@@ -13,7 +13,9 @@ deploy backend, under the backend root dir, use ps (or bash), run: (Nathan's git
     model profile activate nathang2022
     modal deploy src/app.py
 
-qdrant.io - vectorstore (Nathan's gmail sso)
+qdrant.io - vectorstore (Nathan's gmail sso) 
+    Websites - for index_qdrant.py
+    NewChats - for chat_qdrant.py - with chat history (used to be Redis)
 
 docker run -d --name redis-stack-server -p 6379:6379 redis/redis-stack-server:latest
 docker exec -it redis-stack-server redis-cli

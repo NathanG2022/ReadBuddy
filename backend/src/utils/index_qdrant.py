@@ -22,6 +22,18 @@ client = QdrantClient(
     api_key=qdrant_api_key
 )
 
+
+def create_collection(collection_name):
+    client.create_collection(
+        collection_name=collection_name,
+        vectors_config=models.VectorParams(size=1536, distance=models.Distance.COSINE)
+    )
+    print(f"Collection {collection_name} created successfully")
+
+
+if not client.collection_exists(collection_name=collection_name):
+    create_collection(collection_name)
+
 vector_store = QdrantVectorStore(
     client=client,
     collection_name=collection_name,
@@ -36,12 +48,6 @@ text_splitter = RecursiveCharacterTextSplitter(
     length_function=len
 )
 
-def create_collection(collection_name):
-    client.create_collection(
-        collection_name=collection_name,
-        vectors_config=models.VectorParams(size=1536, distance=models.Distance.COSINE)
-    )
-    print(f"Collection {collection_name} created successfully")
 
 def upload_webpage(url:str):
     if not client.collection_exists(collection_name=collection_name):
@@ -54,6 +60,7 @@ def upload_webpage(url:str):
     
     vector_store.add_documents(docs)
     return f"Successfully uploaded {len(docs)} documents to collection {collection_name} from {url}"
+
 
 def upload_file(file: UploadFile):
     file_path = file.filename
@@ -87,6 +94,7 @@ def upload_file(file: UploadFile):
         print(f"Error: {file_path} : {e.strerror}")
         
     return {"message": "done."}
+
 
 def qdrant_search(query: str):
     vector_search = get_embedding(query)

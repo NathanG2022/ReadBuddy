@@ -1,0 +1,80 @@
+/* Default layout for larger screens (left-to-right) */
+.results-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px; /* Add space between the "Answer" and "Documents" */
+    justify-content: space-between;
+}
+
+/* Mobile layout (top-to-bottom) for screens smaller than 768px */
+@media (max-width: 768px) {
+    .results-container {
+        flex-direction: column;
+    }
+
+    /* Make each section (Answer and Documents) take the full width */
+    .results-answer,
+    .results-documents {
+        width: 100%; /* Full width on mobile screens */
+    }
+}
+
+/* Expander styling */
+.expander {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    max-width: 100%; /* Ensure it doesn't overflow its container */
+    word-wrap: break-word; /* Break long words or URLs */
+    overflow-wrap: break-word; /* Ensures URLs don't overflow */
+}
+
+.expander-title {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.expander-content {
+    margin-top: 5px;
+    word-wrap: break-word; /* Break long words or URLs */
+    overflow-wrap: break-word; /* Ensures long URLs wrap */
+    white-space: normal; /* Allow the text to wrap */
+}
+
+/* Styling for file upload button */
+input[type="file"] {
+    display: none;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px; /* Adds space between the buttons */
+    justify-content: center; /* Aligns the buttons horizontally */
+    align-items: center; /* Ensures all buttons are vertically aligned */
+}
+
+.custom-file-upload {
+    display: inline-block;
+    padding: 8px 12px;
+    cursor: pointer;
+    background-color: #6f54d2;
+    color: white;
+    border-radius: 4px;
+    text-align: center;
+    height: 40px; /* Adjust this to match the button height */
+    line-height: 24px; /* Ensures vertical alignment of text */
+}
+
+#file-upload {
+    display: none;
+}
+
+/* Results documents styling */
+.results-documents {
+    max-width: 100%; /* Ensure container takes full width */
+    word-wrap: break-word; /* Break long URLs */
+    overflow-wrap: break-word; /* Prevent overflow */
+    padding: 10px;
+    border-radius: 8px;
+}

@@ -8,6 +8,7 @@ import { ChatRegular, DocumentAddRegular, LinkAddRegular } from "@fluentui/react
 
 const api = axios.create({
     baseURL: 'https://nathang2022--readbuddy-backend-endpoint.modal.run'
+    // baseURL: 'http://localhost:8000'
 });
 
 const Expander = ({ title, content, metadata }) => {
@@ -77,7 +78,8 @@ function QuestionForm() {
         setIsLoading(true);
         e.preventDefault();
 
-        const websocket = new WebSocket('wss://nathang2022--rag-backend-endpoint.modal.run/async_chat');
+        // const websocket = new WebSocket('ws://localhost:8000/async_chat');
+        const websocket = new WebSocket('wss://nathang2022--readbuddy-backend-endpoint.modal.run/async_chat');
 
         websocket.onopen = () => {
             websocket.send(question);

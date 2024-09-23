@@ -15,8 +15,9 @@ app.image = Image.debian_slim().poetry_install_from_file("./pyproject.toml")
 
 @app.function(secrets=[Secret.from_dotenv()])
 @asgi_app()
-def endpoint():
 
+
+def endpoint():
     # List to store active WebSocket connections
     active_websockets: List[WebSocket] = []
 
@@ -27,7 +28,7 @@ def endpoint():
     )
 
     origins = [
-        "https://frontend-opal-alpha.vercel.app",
+        "https://readbuddyfrontend.vercel.app",
         "http://localhost:3000"
     ]
 

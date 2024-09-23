@@ -28,5 +28,6 @@ storage: AWS S3 root: jim.guan@gmail.com 1!B
 To make it work locally:
 1. BE - app.py - comment out ln 12-18, indent, comment out last line
 2. FE - Questionform.js - use:
-        const websocket = new WebSocket('ws://localhost:8000/async_chat');
+        ln 10 - baseURL: 'http://localhost:8000'
+        ln 81 - const websocket = new WebSocket('ws://localhost:8000/async_chat');
 

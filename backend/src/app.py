@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from src.utils.chat_rag import get_answer_and_docs, async_get_answer_and_docs, async_get_text
 from src.utils.index_qdrant import upload_webpage, upload_file
-from src.utils.upload_s3 import upload_to_s3
+from src.utils.upload_s3 import upload_to_s3, process_image
 from typing import List
 
 # app = App("readbuddy-backend")
@@ -123,5 +123,35 @@ async def upload_image_to_s3(file: UploadFile = File(...)):
         active_websockets.remove(websocket)
     
     return result
+
+@app.post("/process_image", description="Process image using GPT-4 API")
+async def process_image_endpoint(file: UploadFile = File(...)):
+    try:
+        # Call the process_image function from image_processing.py
+        result = await process_image(file)
+
+        # Broadcast message to all active WebSocket clients
+        disconnected_clients = []
+        for websocket in active_websockets:
+            try:
+                event = {
+                    "event_type": "on_image_process",
+                    "content": result
+                }
+                await websocket.send_text(json.dumps(event))
+
+            except Exception as e:
+                print(f"Failed to send to WebSocket: {e}")
+                disconnected_clients.append(websocket)
+
+        # Remove disconnected clients from the list
+        for websocket in disconnected_clients:
+            active_websockets.remove(websocket)
+
+        return {"message": "Image processed successfully", "response": result}
+
+    except Exception as e:
+        print(f"Error processing image: {e}")
+        return {"error": str(e)}
 
     # return app

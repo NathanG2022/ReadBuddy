@@ -4,7 +4,7 @@ import { BounceLoader } from 'react-spinners';
 import ReactMarkdown from 'react-markdown';
 import './QuestionForm.css';
 import { Button } from "@fluentui/react-components";
-import { ChatRegular, DocumentAddRegular, LinkAddRegular } from "@fluentui/react-icons";
+import { BookOpenRegular, DocumentAddRegular, LinkAddRegular } from "@fluentui/react-icons";
 
 const api = axios.create({
     // baseURL: 'https://nathang2022--readbuddy-backend-endpoint.modal.run'
@@ -56,8 +56,7 @@ const Expander = ({ title, content, metadata }) => {
 
 function QuestionForm() {
     const [question, setQuestion] = useState('');
-    const [answer, setAnswer] = useState('');
-    const [documents, setDocuments] = useState([]);
+    const [paragraph, setParagraph] = useState(''); // State to store the paragraph response
     const [isLoading, setIsLoading] = useState(false);
 
     // const handleSubmit = async (e) => {
@@ -73,40 +72,41 @@ function QuestionForm() {
     //     setIsLoading(false);
     // }
 
-    const handleSubmit = async (e) => {
-        setAnswer('');
+    const handleRead = async (e) => {
+        setParagraph(null); // Reset the response before the WebSocket connection
         setIsLoading(true);
         e.preventDefault();
 
+        // Open the WebSocket connection without rendering content immediately
         const websocket = new WebSocket('ws://localhost:8000/async_chat');
         // const websocket = new WebSocket('wss://nathang2022--readbuddy-backend-endpoint.modal.run/async_chat');
 
         websocket.onopen = () => {
-            websocket.send(question);
+            console.log("WebSocket connection established.");
+            websocket.send(question); // Send the question to initialize the WebSocket connection
         };
 
         websocket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            if (data.event_type === 'on_retriever_end') {
-                setDocuments(data.content);
-            } else if (data.event_type === 'on_chat_model_stream') {
-                setAnswer(prev => prev + data.content);
-            } else if (data.event_type === 'on_image_process') {
-                setAnswer(prev => prev + data.content);
+            console.log(data)
+            if (data.event_type === 'on_image_process') {
+                console.log(data)
+                setParagraph(data.content); // Store the response in state
             }
         };
 
         websocket.onclose = () => {
+            console.log("WebSocket connection closed.");
             setIsLoading(false);
         };
     };
 
     const handleIndexing = async (e) => {
         e.preventDefault();
-        setAnswer('');
+        setParagraph(null);
         setIsLoading(true);
         const response = await api.post('/indexingURL', { message: question });
-        setAnswer(response.data.response);
+        setParagraph(response.data.response);
         setIsLoading(false);
     };
 
@@ -116,7 +116,7 @@ function QuestionForm() {
         if (!file) return;
 
         e.preventDefault();
-        setAnswer('');
+        setParagraph(null);
         setIsLoading(true);
         let formData = new FormData();
         formData.append("file", file, fileName);
@@ -127,7 +127,7 @@ function QuestionForm() {
                 'Accept': 'application/json'
             }
         }).then(function (res) {
-            setAnswer(`"${fileName}" uploaded successfully.`);
+            setParagraph(`"${fileName}" uploaded successfully.`);
             setIsLoading(false);
         }).catch(function (e) {
             setIsLoading(false);
@@ -137,12 +137,31 @@ function QuestionForm() {
     return (
         <div className="main-container">
             <form className="form">
-                <input className="form-input" type="text" value={question} onChange={(e) => setQuestion(e.target.value)} />
+                <input 
+                    className="form-input" 
+                    type="text" 
+                    value={question} 
+                    onChange={(e) => setQuestion(e.target.value)} 
+                    placeholder="Enter your question or topic"
+                />
                 <div className="button-container">
-                    <Button appearance="primary" icon={<ChatRegular />} style={{ backgroundColor: '#ef85c8', height: '54px', borderRadius: '3px' }} type="submit" onClick={handleSubmit}>
-                        Let's Chat!
+                    {/* "Let's Read!" button */}
+                    <Button 
+                        appearance="primary" 
+                        icon={<BookOpenRegular />} 
+                        style={{ backgroundColor: '#ef85c8', height: '54px', borderRadius: '3px' }} 
+                        type="submit" 
+                        onClick={handleRead}
+                    >
+                        Let's Read!
                     </Button>
-                    <Button appearance="primary" icon={<LinkAddRegular />} style={{ backgroundColor: '#546fd2', height: '54px', borderRadius: '3px' }} type="submit" onClick={handleIndexing}>
+                    <Button 
+                        appearance="primary" 
+                        icon={<LinkAddRegular />} 
+                        style={{ backgroundColor: '#546fd2', height: '54px', borderRadius: '3px' }} 
+                        type="submit" 
+                        onClick={handleIndexing}
+                    >
                         Add Webpage
                     </Button>
                     <div>
@@ -153,34 +172,21 @@ function QuestionForm() {
                     </div>
                 </div>
             </form>
+
+            {/* Show loader while waiting */}
             {isLoading && (
                 <div className="loader-container">
                     <BounceLoader color="#3498db" />
                 </div>
             )}
-            {answer && (
+
+            {/* Render the paragraph when available */}
+            {paragraph && (
                 <div className="results-container">
-                    <div className="results-answer">
-                        <h2>Answer:</h2>
-                        <ReactMarkdown>{answer}</ReactMarkdown>
-                    </div>
-                    {documents?.length ? (
-                        <div className="results-documents">
-                            <h2>References:</h2>
-                            <ul>
-                                {documents.map((document, index) => (
-                                    <Expander 
-                                        key={index} 
-                                        title={document.page_content.split(" ").slice(0, 5).join(" ") + "..."} 
-                                        content={document.page_content} 
-                                        metadata={document.metadata} />
-                                ))}
-                            </ul>
-                        </div>
-                    ) : null}
+                    <p>{paragraph}</p>
                 </div>
             )}
-        </div>
+         </div>
     );
 }
 

@@ -7,8 +7,8 @@ import { Button } from "@fluentui/react-components";
 import { ChatRegular, DocumentAddRegular, LinkAddRegular } from "@fluentui/react-icons";
 
 const api = axios.create({
-    baseURL: 'https://nathang2022--readbuddy-backend-endpoint.modal.run'
-    // baseURL: 'http://localhost:8000'
+    // baseURL: 'https://nathang2022--readbuddy-backend-endpoint.modal.run'
+    baseURL: 'http://localhost:8000'
 });
 
 const Expander = ({ title, content, metadata }) => {
@@ -78,8 +78,8 @@ function QuestionForm() {
         setIsLoading(true);
         e.preventDefault();
 
-        // const websocket = new WebSocket('ws://localhost:8000/async_chat');
-        const websocket = new WebSocket('wss://nathang2022--readbuddy-backend-endpoint.modal.run/async_chat');
+        const websocket = new WebSocket('ws://localhost:8000/async_chat');
+        // const websocket = new WebSocket('wss://nathang2022--readbuddy-backend-endpoint.modal.run/async_chat');
 
         websocket.onopen = () => {
             websocket.send(question);
@@ -90,6 +90,8 @@ function QuestionForm() {
             if (data.event_type === 'on_retriever_end') {
                 setDocuments(data.content);
             } else if (data.event_type === 'on_chat_model_stream') {
+                setAnswer(prev => prev + data.content);
+            } else if (data.event_type === 'on_image_process') {
                 setAnswer(prev => prev + data.content);
             }
         };

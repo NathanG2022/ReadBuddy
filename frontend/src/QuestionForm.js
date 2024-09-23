@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 import { BounceLoader } from 'react-spinners';
 import ReactMarkdown from 'react-markdown';
@@ -10,6 +10,7 @@ const api = axios.create({
     // baseURL: 'https://nathang2022--readbuddy-backend-endpoint.modal.run'
     baseURL: 'http://localhost:8000'
 });
+
 
 const Expander = ({ title, content, metadata }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +59,8 @@ function QuestionForm() {
     const [question, setQuestion] = useState('');
     const [paragraph, setParagraph] = useState(''); // State to store the paragraph response
     const [isLoading, setIsLoading] = useState(false);
+    const [isReading, setIsReading] = useState(false); // State to toggle between "Let's Read!" and "Stop Read"
+    const websocketRef = useRef(null); // Use ref to store the WebSocket instance
 
     // const handleSubmit = async (e) => {
     //     setAnswer('');
@@ -72,33 +75,44 @@ function QuestionForm() {
     //     setIsLoading(false);
     // }
 
-    const handleRead = async (e) => {
-        setParagraph(null); // Reset the response before the WebSocket connection
-        setIsLoading(true);
+    const handleReadToggle = async (e) => {
         e.preventDefault();
 
-        // Open the WebSocket connection without rendering content immediately
-        const websocket = new WebSocket('ws://localhost:8000/async_chat');
-        // const websocket = new WebSocket('wss://nathang2022--readbuddy-backend-endpoint.modal.run/async_chat');
-
-        websocket.onopen = () => {
-            console.log("WebSocket connection established.");
-            websocket.send(question); // Send the question to initialize the WebSocket connection
-        };
-
-        websocket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log(data)
-            if (data.event_type === 'on_image_process') {
-                console.log(data)
-                setParagraph(data.content); // Store the response in state
+        if (isReading) {
+            // If reading, close the WebSocket and stop
+            if (websocketRef.current) {
+                websocketRef.current.close();
             }
-        };
+            setIsReading(false); // Toggle back to "Let's Read!"
+            setIsLoading(false);  // Stop loading state
+        } else {
+            // Start reading (open WebSocket)
+            setParagraph(null); // Reset the response before the WebSocket connection
+            setIsLoading(true);
+            setIsReading(true); // Toggle to "Stop Read"
+            
+            // Open the WebSocket connection
+            const websocket = new WebSocket('ws://localhost:8000/async_chat');
+            websocketRef.current = websocket; // Save WebSocket instance in ref
 
-        websocket.onclose = () => {
-            console.log("WebSocket connection closed.");
-            setIsLoading(false);
-        };
+            websocket.onopen = () => {
+                console.log("WebSocket connection established.");
+                websocket.send(question); // Send the question to initialize the WebSocket connection
+            };
+
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.event_type === 'on_image_process') {
+                    setParagraph(data.content); // Store the response in state
+                }
+            };
+
+            websocket.onclose = () => {
+                console.log("WebSocket connection closed.");
+                setIsReading(false); // Toggle back to "Let's Read!"
+                setIsLoading(false);
+            };
+        }
     };
 
     const handleIndexing = async (e) => {
@@ -145,15 +159,15 @@ function QuestionForm() {
                     placeholder="Enter your question or topic"
                 />
                 <div className="button-container">
-                    {/* "Let's Read!" button */}
+                    {/* "Let's Read!" / "Stop Read" button */}
                     <Button 
                         appearance="primary" 
                         icon={<BookOpenRegular />} 
                         style={{ backgroundColor: '#ef85c8', height: '54px', borderRadius: '3px' }} 
                         type="submit" 
-                        onClick={handleRead}
+                        onClick={handleReadToggle}
                     >
-                        Let's Read!
+                        {isReading ? 'Stop Read' : "Let's Read!"} {/* Toggle button text */}
                     </Button>
                     <Button 
                         appearance="primary" 

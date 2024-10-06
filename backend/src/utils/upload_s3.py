@@ -77,6 +77,15 @@ async def process_image(file: UploadFile):
             max_tokens=500,
         )
 
+        response2 = client.images.generate(
+            prompt="generate a cute little black dog",  # Pass as a keyword argument
+            size="1024x1024"  # Other optional parameters as needed
+        )
+
+        # Extract the image URL or data from the response
+        image_url = response2.data[0].url
+        print(f"Generated image URL: {image_url}")
+
         # Return the response from OpenAI
         return response.choices[0].message.content
 

@@ -64,7 +64,7 @@ async def process_image(file: UploadFile):
                     "content": [
                         {
                             "type": "text", 
-                            "text": "Return one paragraph of the data"
+                            "text": "Please extract the text from the image attached"
                         },
                         {
                             "type": "image_url",

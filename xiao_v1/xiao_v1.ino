@@ -16,7 +16,8 @@ const char* password = "54697df560";
 #include "camera_pins.h"
 
 // Server URL for uploading images and receiving text
-const char* serverUrl = "https://nathang2022--readbuddy-backend-endpoint.modal.run/uploadS3";
+// const char* serverUrl = "https://nathang2022--readbuddy-backend-endpoint.modal.run/uploadS3";
+const char* serverUrl = "http://192.168.86.36:8000/process_image";
 
 void setup() {
   Serial.begin(115200);

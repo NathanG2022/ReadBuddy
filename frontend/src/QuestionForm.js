@@ -60,6 +60,8 @@ function QuestionForm() {
     const [paragraph, setParagraph] = useState(''); // State to store the paragraph response
     const [isLoading, setIsLoading] = useState(false);
     const [isReading, setIsReading] = useState(false); // State to toggle between "Let's Read!" and "Stop Read"
+    const [answer, setAnswer] = useState('');
+    const [documents, setDocuments] = useState([]);
     const websocketRef = useRef(null); // Use ref to store the WebSocket instance
 
     // const handleSubmit = async (e) => {
@@ -115,6 +117,31 @@ function QuestionForm() {
         }
     };
 
+    const handleSubmit = async (e) => {
+        setAnswer('');
+        setIsLoading(true);
+        e.preventDefault();
+
+        const websocket = new WebSocket('wss://nathang2022--rag-backend-endpoint.modal.run/async_chat');
+
+        websocket.onopen = () => {
+            websocket.send(question);
+        };
+
+        websocket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.event_type === 'on_retriever_end') {
+                setDocuments(data.content);
+            } else if (data.event_type === 'on_chat_model_stream') {
+                setAnswer((prev) => prev + data.content);
+            }
+        };
+
+        websocket.onclose = () => {
+            setIsLoading(false);
+        };
+    };
+
     const handleIndexing = async (e) => {
         e.preventDefault();
         setParagraph(null);
@@ -150,6 +177,18 @@ function QuestionForm() {
 
     return (
         <div className="main-container">
+            {/* New line for "Let's Read!" / "Stop Read" button */}
+            <h2>Welcome to AI Agent for Neurodivergent!</h2>
+            <Button
+                appearance="primary"
+                icon={<BookOpenRegular />}
+                style={{ backgroundColor: '#ef85c8', height: '54px', borderRadius: '3px', marginBottom: '20px' }}
+                type="submit"
+                onClick={handleReadToggle}
+            >
+                {isReading ? 'Stop Read' : "Let's Read!"}
+            </Button>
+
             <form className="form">
                 <input 
                     className="form-input" 
@@ -159,15 +198,14 @@ function QuestionForm() {
                     placeholder="Enter your question or topic"
                 />
                 <div className="button-container">
-                    {/* "Let's Read!" / "Stop Read" button */}
                     <Button 
                         appearance="primary" 
                         icon={<BookOpenRegular />} 
                         style={{ backgroundColor: '#ef85c8', height: '54px', borderRadius: '3px' }} 
                         type="submit" 
-                        onClick={handleReadToggle}
+                        onClick={handleSubmit}
                     >
-                        {isReading ? 'Stop Read' : "Let's Read!"} {/* Toggle button text */}
+                        Submit
                     </Button>
                     <Button 
                         appearance="primary" 
@@ -198,6 +236,29 @@ function QuestionForm() {
             {paragraph && (
                 <div className="results-container">
                     <p>{paragraph}</p>
+                </div>
+            )}
+
+            {answer && (
+                <div className="results-container">
+                    <div className="results-answer">
+                        <h2>Answer:</h2>
+                        <ReactMarkdown>{answer}</ReactMarkdown>
+                    </div>
+                    {documents?.length ? (
+                        <div className="results-documents">
+                            <h2>References:</h2>
+                            <ul>
+                                {documents.map((document, index) => (
+                                    <Expander 
+                                        key={index} 
+                                        title={document.page_content.split(" ").slice(0, 5).join(" ") + "..."} 
+                                        content={document.page_content} 
+                                        metadata={document.metadata} />
+                                ))}
+                            </ul>
+                        </div>
+                    ) : null}
                 </div>
             )}
          </div>

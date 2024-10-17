@@ -78,7 +78,7 @@ function QuestionForm() {
             setIsLoading(false);  // Stop loading state
         } else {
             // Start reading (open WebSocket)
-            setParagraph(null); // Reset the response before the WebSocket connection
+            setParagraph(''); // Reset the response before the WebSocket connection
             setIsLoading(true);
             setIsReading(true); // Toggle to "Stop Read"
             
@@ -113,7 +113,7 @@ function QuestionForm() {
             return;
         }
 
-        setAnswer(null);  // Reset the answer field
+        setAnswer('');  // Reset the answer field
         setDocuments([]);  // Reset the documents field
         setIsLoading(true);  // Start loading state
 
@@ -154,7 +154,7 @@ function QuestionForm() {
     
     const handleIndexing = async (e) => {
         e.preventDefault();
-        setAnswer(null);
+        setAnswer('');
         setIsLoading(true);
         const response = await api.post('/indexingURL', { message: question });
         setAnswer(response.data.response);
@@ -167,7 +167,7 @@ function QuestionForm() {
         if (!file) return;
 
         e.preventDefault();
-        setAnswer(null);
+        setAnswer('');
         setIsLoading(true);
         let formData = new FormData();
         formData.append("file", file, fileName);
@@ -187,10 +187,10 @@ function QuestionForm() {
 
     const toggleMode = () => {
         if (showAdvanced) {
-            setAnswer(null);
+            setAnswer('');
             setDocuments([]);
         } else {
-            setParagraph(null);
+            setParagraph('');
         }
         setShowAdvanced(!showAdvanced);
     };
@@ -198,9 +198,8 @@ function QuestionForm() {
     return (
         <div className="main-container">
             {/* Wrapping the toggleable buttons and content in a fixed height container */}
-            <div style={{ minHeight: '300px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}> {/* Adjust height as needed */}
+            <div style={{ minHeight: '150px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}> {/* Adjust height as needed */}
                 {/* Toggle Button to switch modes */}
-                <br/>
                 <Button
                     appearance="secondary"
                     icon={showAdvanced ? <BookOpenRegular /> : <CursorClickRegular />} // Different icons for each mode

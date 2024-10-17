@@ -15,6 +15,9 @@ npm start
 
 - Deploy frontend, under the frontend root dir, run: (Nathan's github sso)
 ```
+vercel whoami
+vercel logout
+vercel login
 vercel --prod --yes
 ```
 

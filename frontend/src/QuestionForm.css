@@ -10,7 +10,8 @@
     max-width: 100%;  /* Same max width as the container */
     line-height: 1.6;  /* Improve readability with larger line height */
     text-align: left;  /* Align text to the left */
-    margin-bottom: 20px; /* Add some space after the paragraph */
+    margin-bottom: 4px; /* Add some space after the paragraph */
+    font-size: 18px;
 }
 
 /* Mobile layout (top-to-bottom) for screens smaller than 768px */

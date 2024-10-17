@@ -8,6 +8,7 @@ from src.utils.chat_rag import get_answer_and_docs, async_get_answer_and_docs, a
 from src.utils.index_qdrant import upload_webpage, upload_file
 from src.utils.upload_s3 import upload_to_s3, process_image
 from typing import List
+from starlette.websockets import WebSocketDisconnect
 
 # app = App("readbuddy-backend")
 
@@ -41,9 +42,9 @@ app.add_middleware(
 class Message(BaseModel):
     message: str
 
-# WebSocket endpoint: Keeps track of connected clients
-@app.websocket('/async_chat')
-async def async_chat(websocket: WebSocket):
+# WebSocket endpoint for start stop read: Keeps track of connected clients
+@app.websocket('/async_read')
+async def async_read(websocket: WebSocket):
     await websocket.accept()
 
     # Add the WebSocket to the list of active connections
@@ -61,13 +62,48 @@ async def async_chat(websocket: WebSocket):
                 else:
                     await websocket.send_text(json.dumps(event))
             
-            # Keep connection alive and wait for further events
+    except WebSocketDisconnect:
+        print("WebSocket connection was closed by the client.")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+    finally:
+        # Ensure WebSocket is removed and closed properly
+        if websocket in active_websockets:
+            active_websockets.remove(websocket)
+            
+        # Try to close the WebSocket if it hasn't already been closed
+        try:
+            await websocket.close()
+        except RuntimeError:
+            print("WebSocket was already closed.")
+
+# WebSocket endpoint for submit question: Keeps track of connected clients
+@app.websocket('/async_chat')
+async def async_chat(websocket: WebSocket):
+    await websocket.accept()
+
+    # Add the WebSocket to the list of active connections
+    active_websockets.append(websocket)
+
+    try:
+        # Receive a question from the client
+        question = await websocket.receive_text()
+
+        # Stream answer and docs back to the client
+        async for event in async_get_answer_and_docs(question):
+            if event["event_type"] == "done":
+                await websocket.send_text(json.dumps({"final": True}))
+                break
+            else:
+                await websocket.send_text(json.dumps(event))
+
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:
         # Remove WebSocket from the active list if closed
-        active_websockets.remove(websocket)
-        await websocket.close()
+        if websocket in active_websockets:
+            active_websockets.remove(websocket)
+        await websocket.close()  # Explicitly close the WebSocket connection
 
 # POST endpoint for chat, synchronous version
 @app.post("/chat", description="Chat with the RAG API through this endpoint")

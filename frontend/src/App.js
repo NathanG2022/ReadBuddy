@@ -7,9 +7,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         <p>
-          Welcome to AI Agent for Neurodivergent!
+          Welcome to Read Buddy for Neurodivergent!
         </p>
-        <img src={logo} className="App-logo" alt="logo" />
+        {/* <img src={logo} className="App-logo" alt="logo" /> */}
         <QuestionForm />
 
       </header>

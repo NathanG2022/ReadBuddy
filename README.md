@@ -47,9 +47,19 @@ FT.DROPINDEX Websites DD
 
 - BE - app.py
 1. comment out ln 12-18, indent
+```
+# app = App("readbuddy-backend")
+# app.image = Image.debian_slim().poetry_install_from_file("./pyproject.toml")
+# @app.function(secrets=[Secret.from_dotenv()])
+# @asgi_app()
+````
 2. comment out last line
-
-- FE - Questionform.js - use:
-1. ln 10 - ```baseURL: 'http://localhost:8000'```
-2. ln 81 - ```const websocket = new WebSocket('ws://localhost:8000/async_chat');```
+```
+    # return app
+```
+- FE - Questionform.js - ln 9-10:
+```
+const baseURL = 'http://localhost:8000' // 'https://nathang2022--readbuddy-backend-endpoint.modal.run'
+const websocketURL = 'ws://localhost:8000' // 'wss://nathang2022--rag-backend-endpoint.modal.run'
+```
 

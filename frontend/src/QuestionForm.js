@@ -58,7 +58,7 @@ const Expander = ({ title, content, metadata }) => {
 
 function QuestionForm() {
     const [question, setQuestion] = useState('');
-    const [paragraph, setParagraph] = useState(''); // State to store the paragraph response
+    const [response, setResponse] = useState(''); // State to store the response
     const [isLoading, setIsLoading] = useState(false);
     const [isReading, setIsReading] = useState(false); // State to toggle between "Let's Read!" and "Stop Read"
     const [answer, setAnswer] = useState('');
@@ -78,7 +78,7 @@ function QuestionForm() {
             setIsLoading(false);  // Stop loading state
         } else {
             // Start reading (open WebSocket)
-            setParagraph(''); // Reset the response before the WebSocket connection
+            setResponse(''); // Reset the response before the WebSocket connection
             setIsLoading(true);
             setIsReading(true); // Toggle to "Stop Read"
             
@@ -93,7 +93,7 @@ function QuestionForm() {
             websocket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 if (data.event_type === 'on_image_process') {
-                    setParagraph(data.content); // Store the response in state
+                    setResponse(data.content); // Store the response in state
                 }
             };
 
@@ -190,7 +190,7 @@ function QuestionForm() {
             setAnswer('');
             setDocuments([]);
         } else {
-            setParagraph('');
+            setResponse('');
         }
         setShowAdvanced(!showAdvanced);
     };
@@ -277,9 +277,21 @@ function QuestionForm() {
                 </div>
             )}
 
-            {!showAdvanced && paragraph && (
-                <div className="paragraph-container">
-                    <p>{paragraph}</p>
+            {!showAdvanced && response && (
+                <div className="response-container">
+                    {/* Render the extracted text */}
+                    {response.text && (
+                        <div className="response-container">
+                            <p>{response.text}</p>
+                        </div>
+                    )}
+
+                    {/* Render the generated image */}
+                    {response.image_url && (
+                        <div className="image-container">
+                            <img src={response.image_url} alt="Generated Image" className="centered-image" />
+                        </div>
+                    )}
                 </div>
             )}
 

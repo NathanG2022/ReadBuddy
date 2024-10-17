@@ -64,7 +64,12 @@ async def process_image(file: UploadFile):
                     "content": [
                         {
                             "type": "text", 
-                            "text": "Please extract the text from the image attached"
+                            "text": (
+                                "Assume you are an experienced tutor who teaches middle school neurodivergent kids."
+                                "The input is a screenshot from a book. Please first extract the text from the image and "
+                                "then explain the text in a simplified, engaging, and supportive manner that is "
+                                "appropriate for neurodivergent students. Please just output the Simplified explanation."
+                            ),
                         },
                         {
                             "type": "image_url",
@@ -78,8 +83,12 @@ async def process_image(file: UploadFile):
         )
 
         response2 = client.images.generate(
-            prompt="generate a cute little black dog",  # Pass as a keyword argument
-            size="1024x1024"  # Other optional parameters as needed
+            prompt=(
+                "Assume you are an artist who specializes in creating visuals for neurodivergent children. Based on the "
+                "simplified explanation of the book section provided here: {response.choices[0].message.content}, please "
+                "generate an image that will help neurodivergent middle school students better understand the content of the screenshot."
+            ),
+            size="512x512"  # Other optional parameters as needed
         )
 
         # Extract the image URL or data from the response
@@ -87,7 +96,10 @@ async def process_image(file: UploadFile):
         print(f"Generated image URL: {image_url}")
 
         # Return the response from OpenAI
-        return response.choices[0].message.content
+        return {
+            "text":  response.choices[0].message.content,
+            "image_url": response2.data[0].url
+        }
 
     except Exception as e:
         print(f"Error processing image or calling OpenAI: {e}")

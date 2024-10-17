@@ -6,11 +6,11 @@
     justify-content: space-between;
 }
 
-.paragraph-container {
+.response-container {
     max-width: 100%;  /* Same max width as the container */
     line-height: 1.6;  /* Improve readability with larger line height */
     text-align: left;  /* Align text to the left */
-    margin-bottom: 4px; /* Add some space after the paragraph */
+    margin-bottom: 4px; /* Add some space after the response */
     font-size: 18px;
 }
 
@@ -97,4 +97,15 @@ input[type="file"] {
     overflow-wrap: break-word; /* Prevent overflow */
     padding: 10px;
     border-radius: 8px;
+}
+
+.image-container {
+    text-align: center;
+}
+
+.centered-image {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
 }

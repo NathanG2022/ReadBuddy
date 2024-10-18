@@ -281,16 +281,16 @@ function QuestionForm() {
                 <div className="response-container">
                     {/* Render the extracted text */}
                     {response.text && (
-                        <div className="response-container">
-                            <p>{response.text}</p>
-                        </div>
+                        <p dangerouslySetInnerHTML={{ 
+                            __html: response.text
+                                .split(/(?<=[.!?])\s+/) // Split by sentence-ending punctuation and space
+                                .join("<br />") // Join with <br /> to add new lines
+                        }}></p>
                     )}
 
                     {/* Render the generated image */}
                     {response.image_url && (
-                        <div className="image-container">
-                            <img src={response.image_url} alt="Generated Image" className="centered-image" />
-                        </div>
+                        <img src={response.image_url} alt="Illustration based on the provided text" className="centered-image" />
                     )}
                 </div>
             )}

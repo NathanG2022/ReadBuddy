@@ -55,8 +55,8 @@ async def process_image(file: UploadFile):
         base64_img = await encode_image_to_base64(file)
 
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        # Create a chat completion request with the base64-encoded image
-        response = client.chat.completions.create(
+
+        response1 = client.chat.completions.create(
             model='gpt-4o',
             messages=[
                 {
@@ -65,10 +65,11 @@ async def process_image(file: UploadFile):
                         {
                             "type": "text", 
                             "text": (
-                                "Assume you are an experienced tutor who teaches middle school neurodivergent kids."
-                                "The input is a screenshot from a book. Please first extract the text from the image and "
-                                "then explain the text in a simplified, engaging, and supportive manner that is "
-                                "appropriate for neurodivergent students. Please just output the Simplified explanation."
+                                "Please extract the text from the attached screenshot with high accuracy, ensuring "
+                                "that all punctuation, capitalization, and formatting are preserved as closely as possible. "
+                                "The goal is to capture the full text exactly as it appears in the image, without any "
+                                "additional characters or missing content. Pay attention to any special characters, italics, "
+                                "or unusual spacing to ensure the extracted text matches the original formatting."
                             ),
                         },
                         {
@@ -82,23 +83,61 @@ async def process_image(file: UploadFile):
             max_tokens=500,
         )
 
-        response2 = client.images.generate(
+        # Extracted text cleanup: Remove line return characters (\n)
+        extracted_text = response1.choices[0].message.content.replace("\n", "") if response1 and response1.choices else None
+        if not extracted_text:
+            raise ValueError("Failed to extract text from the image")
+        print("extracted text: " + extracted_text)
+
+        response2 = client.chat.completions.create(
+            model='gpt-4o',
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                "You are an experienced tutor who teaches middle school kids."
+                                "The following text is from a book. Explain it in a simple, engaging, and supportive way."
+                                "Make the explanation suitable for neurodivergent students. Use short, clear sentences."
+                                "Keep the response under 80 words. Here is the text: " + extracted_text
+                            ),
+                        },
+                    ],
+                }
+            ],
+            temperature=0.7,
+            max_tokens=500,
+        )
+
+        # Ensure that response2 is valid and contains choices
+        explanation_text = response2.choices[0].message.content if response2 and response2.choices else None
+        if not explanation_text:
+            explanation_text = "Please keep the camera at least 6 inches above the text."
+            raise ValueError("Failed to generate an explanation")
+        print("explanation text: " + explanation_text)
+        
+        response3 = client.images.generate(
             prompt=(
-                "Assume you are an artist who specializes in creating visuals for neurodivergent children. Based on the "
-                "simplified explanation of the book section provided here: {response.choices[0].message.content}, please "
-                "generate an image that will help neurodivergent middle school students better understand the content of the screenshot."
+                "Create an image based on the following excerpt from a book: \n"
+                + explanation_text
+                + "\nThe image should show the emotions of the character, like feeling confused and thoughtful. "
+                "The scene should feel more like reality, with soft colors and a peaceful atmosphere. "
             ),
             size="512x512"  # Other optional parameters as needed
         )
 
-        # Extract the image URL or data from the response
-        image_url = response2.data[0].url
-        print(f"Generated image URL: {image_url}")
+        # Ensure that response3 contains image data
+        image_url = response3.data[0].url if response3 and response3.data else None
+        if not image_url:
+            image_url = "/no_image.jpg"
+            raise ValueError("Failed to generate the illustrative image")
 
         # Return the response from OpenAI
         return {
-            "text":  response.choices[0].message.content,
-            "image_url": response2.data[0].url
+            "text":  explanation_text,
+            "image_url": image_url
         }
 
     except Exception as e:

@@ -7,11 +7,11 @@
 }
 
 .response-container {
-    max-width: 100%;  /* Same max width as the container */
+    max-width: 80%;  /* Same max width as the container */
     line-height: 1.6;  /* Improve readability with larger line height */
-    text-align: left;  /* Align text to the left */
+    text-align: center;  /* Align text to the left */
     margin-bottom: 4px; /* Add some space after the response */
-    font-size: 18px;
+    font-size: 22px;
 }
 
 /* Mobile layout (top-to-bottom) for screens smaller than 768px */

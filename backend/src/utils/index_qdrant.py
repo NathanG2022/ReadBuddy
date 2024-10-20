@@ -113,8 +113,6 @@ def upload_file(file: UploadFile):
     
 
 def qdrant_search(query: str):
-    ensure_collection_exists(collection_name)
-
     vector_search = get_embedding(query)
     docs = client.search(
         collection_name=collection_name,

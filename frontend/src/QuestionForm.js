@@ -219,7 +219,7 @@ function QuestionForm() {
         }
     };
     
-    const toggleMode = () => {
+    const handleToggleMode = () => {
         // Close the WebSocket connection if it's open
         if (websocketRef.current) {
             websocketRef.current.close(); // Close the WebSocket connection if it exists
@@ -228,7 +228,7 @@ function QuestionForm() {
 
         setIsLoading(false);
         setIsReading(false);
-        
+
         setQuestion('');
         setIsLoading('');
         setIsReading('');
@@ -262,7 +262,7 @@ function QuestionForm() {
                         marginBottom: '14px',      // Space below the button
                         cursor: 'pointer'          // Cursor pointer for hover effect
                     }}
-                    onClick={toggleMode}
+                    onClick={handleToggleMode}
                 >
                     {showAdvanced ? "Switch to Quiet Reading Mode" : "Switch to Interactive Reading Mode"}
                 </Button>

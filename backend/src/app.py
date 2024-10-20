@@ -8,7 +8,7 @@ from src.utils.chat_rag import get_answer_and_docs, async_get_answer_and_docs, a
 from src.utils.index_qdrant import upload_webpage, upload_file
 from src.utils.upload_s3 import upload_to_s3, process_image
 from typing import List
-from starlette.websockets import WebSocketDisconnect
+from starlette.websockets import WebSocketDisconnect, WebSocketState
 
 # app = App("readbuddy-backend")
 
@@ -42,6 +42,7 @@ app.add_middleware(
 
 class Message(BaseModel):
     message: str
+
 
 # WebSocket endpoint for start stop read: Keeps track of connected clients
 @app.websocket('/async_read')
@@ -78,6 +79,7 @@ async def async_read(websocket: WebSocket):
         except RuntimeError:
             print("WebSocket was already closed.")
 
+
 # WebSocket endpoint for submit question: Keeps track of connected clients
 @app.websocket('/async_chat')
 async def async_chat(websocket: WebSocket):
@@ -93,18 +95,36 @@ async def async_chat(websocket: WebSocket):
         # Stream answer and docs back to the client
         async for event in async_get_answer_and_docs(question):
             if event["event_type"] == "done":
-                await websocket.send_text(json.dumps({"final": True}))
+                # Send the final message if the connection is still open
+                try:
+                    await websocket.send_text(json.dumps({"final": True}))
+                except Exception as send_error:
+                    print(f"Error sending final message: {send_error}")
                 break
             else:
-                await websocket.send_text(json.dumps(event))
+                # Send messages as long as the connection is open
+                try:
+                    await websocket.send_text(json.dumps(event))
+                except Exception as send_error:
+                    print(f"Error sending event message: {send_error}")
+                    break
 
+    except WebSocketDisconnect:
+        # Handle the client disconnecting
+        print("Client disconnected")
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:
-        # Remove WebSocket from the active list if closed
+        # Remove WebSocket from active connections if it's still there
         if websocket in active_websockets:
             active_websockets.remove(websocket)
-        await websocket.close()  # Explicitly close the WebSocket connection
+
+        # Try to close the WebSocket, but handle if it was already closed
+        try:
+            await websocket.close()
+        except Exception as close_error:
+            print(f"Error closing WebSocket: {close_error}")
+
 
 # POST endpoint for chat, synchronous version
 @app.post("/chat", description="Chat with the RAG API through this endpoint")
@@ -117,6 +137,7 @@ def chat_use_rag(message: Message):
     }
     return JSONResponse(content=response_content, status_code=200)
 
+
 # POST endpoint for uploading a webpage
 @app.post("/indexingURL", description="Index a webpage through this endpoint")
 def indexing_URL(url: Message):
@@ -126,6 +147,7 @@ def indexing_URL(url: Message):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=400)
 
+
 # POST endpoint for uploading a document (PDF or TXT)
 @app.post("/indexingDoc", description="Index a pdf or txt file through this endpoint")
 def indexing_Doc(file: UploadFile = File(...)):
@@ -134,6 +156,7 @@ def indexing_Doc(file: UploadFile = File(...)):
         return JSONResponse(content={"response": response}, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=400)
+
 
 @app.post("/uploadS3", description="Upload image to S3 bucket")
 async def upload_image_to_s3(file: UploadFile = File(...)):
@@ -160,6 +183,7 @@ async def upload_image_to_s3(file: UploadFile = File(...)):
         active_websockets.remove(websocket)
     
     return result
+
 
 @app.post("/process_image", description="Process image using GPT-4 API")
 async def process_image_endpoint(file: UploadFile = File(...)):

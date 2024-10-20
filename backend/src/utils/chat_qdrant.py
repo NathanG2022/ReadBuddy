@@ -70,8 +70,8 @@ vectorstore = QdrantVectorStore(
 )
 
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000, 
-    chunk_overlap=20, 
+    chunk_size=500, 
+    chunk_overlap=50, 
     length_function=len
 )
 

@@ -6,8 +6,8 @@ import './QuestionForm.css';
 import { Button } from "@fluentui/react-components";
 import { BookOpenRegular, CursorClickRegular } from "@fluentui/react-icons"; // Use a cursor icon for interactive mode
 
-const baseURL = 'http://localhost:8000' // 'https://nathang2022--readbuddy-backend-endpoint.modal.run'
-const websocketURL = 'ws://localhost:8000' // 'wss://nathang2022--rag-backend-endpoint.modal.run'
+const baseURL = 'http://192.168.86.249:8000' // 'https://nathang2022--readbuddy-backend-endpoint.modal.run'
+const websocketURL = 'ws://192.168.86.249:8000' // 'wss://nathang2022--rag-backend-endpoint.modal.run'
 
 const api = axios.create({
     baseURL: baseURL
@@ -58,12 +58,12 @@ const Expander = ({ title, content, metadata }) => {
 
 function QuestionForm() {
     const [question, setQuestion] = useState('');
-    const [response, setResponse] = useState(''); // State to store the response
     const [isLoading, setIsLoading] = useState(false);
-    const [isReading, setIsReading] = useState(false); // State to toggle between "Let's Read!" and "Stop Read"
-    const [answer, setAnswer] = useState('');
-    const [documents, setDocuments] = useState([]);
-    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [showAdvanced, setShowAdvanced] = useState(false); // Toggle Quiet and Interactive mode
+    const [response, setResponse] = useState('');      // State for Quiet mode response
+    const [isReading, setIsReading] = useState(false); // State for Quiet mode to toggle between "Let's Read!" and "Stop Read"
+    const [answer, setAnswer] = useState('');          // State for Interactive mode response left pane
+    const [documents, setDocuments] = useState([]);    // State for Interactive mode response right pane
     const websocketRef = useRef(null);
 
     const handleReadToggle = async (e) => {
@@ -104,7 +104,7 @@ function QuestionForm() {
         }
     };
 
-    const handleSubmit = async (e) => {
+    const handleChat = async (e) => {
         e.preventDefault();  // Prevent default form submission behavior
     
         // Prevent starting a new request if one is already in progress
@@ -135,57 +135,104 @@ function QuestionForm() {
     
             // Close the WebSocket connection when the final message is received
             if (data.final) {
-                websocket.close();  // Close the WebSocket connection
+                websocket.close();
             }
         };
     
         // Handle WebSocket closure explicitly
         websocket.onclose = () => {
-            setIsLoading(false);  // Ensure loading is stopped when the connection closes
+            setIsLoading(false);
+            setQuestion('');
         };
     
         // Handle any errors that occur during WebSocket communication
         websocket.onerror = (error) => {
-            console.error('WebSocket Error: ', error);  // Log the error to the console
-            websocket.close();  // Close the WebSocket in case of an error
-            setIsLoading(false);  // Stop the loading state
+            console.error('WebSocket Error: ', error);
+            websocket.close();
+            setIsLoading(false);
+            setQuestion('');
         };
     };
     
-    const handleIndexing = async (e) => {
+    const handleIndexingURL = async (e) => {
         e.preventDefault();
+
+        // Validate if the question is a valid URL
+        const isValidUrl = (urlString) => {
+            try {
+                new URL(urlString);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        if (!isValidUrl(question)) {
+            setQuestion('Please enter a valid URL before submitting.');
+            return; // Exit if question is not a valid URL
+        }
+
         setAnswer('');
+        setDocuments([]);
         setIsLoading(true);
+
         const response = await api.post('/indexingURL', { message: question });
+
+        setQuestion('');
         setAnswer(response.data.response);
         setIsLoading(false);
     };
 
     const handleIndexingDoc = async (e) => {
-        const fileName = e.target.files[0].name;
-        const file = e.target.files[0];
-        if (!file) return;
-
+        const fileName = e.target.files[0]?.name;  // Safely access the file name
+        const file = e.target.files[0];  // Get the file
+    
+        if (!file) return;  // If no file is selected, do nothing
+    
         e.preventDefault();
+
         setAnswer('');
+        setDocuments([]);
+        setQuestion('');
         setIsLoading(true);
+    
+        // Prepare the form data
         let formData = new FormData();
         formData.append("file", file, fileName);
-
-        api.post('/indexingDoc', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'Accept': 'application/json'
-            }
-        }).then(function (res) {
-            setAnswer(`"${fileName}" uploaded successfully.`);
-            setIsLoading(false);
-        }).catch(function (e) {
-            setIsLoading(false);
-        });
+    
+        try {
+            // Await the response from the API
+            const response = await api.post('/indexingDoc', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Accept': 'application/json',
+                },
+            });
+    
+            // Set the answer based on the API response
+            setAnswer(response.data.response);
+        } catch (error) {
+            console.error('Error uploading document:', error);
+            // Optionally handle the error state (e.g., show an error message)
+        } finally {
+            setIsLoading(false);  // Set loading state to false after the request completes
+        }
     };
-
+    
     const toggleMode = () => {
+        // Close the WebSocket connection if it's open
+        if (websocketRef.current) {
+            websocketRef.current.close(); // Close the WebSocket connection if it exists
+            websocketRef.current = null; // Reset the WebSocket reference
+        }
+
+        setIsLoading(false);
+        setIsReading(false);
+        
+        setQuestion('');
+        setIsLoading('');
+        setIsReading('');
+
         if (showAdvanced) {
             setAnswer('');
             setDocuments([]);
@@ -248,7 +295,7 @@ function QuestionForm() {
                                 appearance="primary"
                                 style={{ backgroundColor: '#ef85c8'}}
                                 type="submit"
-                                onClick={handleSubmit}
+                                onClick={handleChat}
                             >
                                 Chat
                             </Button>
@@ -256,7 +303,7 @@ function QuestionForm() {
                                 appearance="primary"
                                 style={{ backgroundColor: '#546fd2'}}
                                 type="submit"
-                                onClick={handleIndexing}
+                                onClick={handleIndexingURL}
                             >
                                 Add Webpage
                             </Button>

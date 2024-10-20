@@ -285,6 +285,17 @@ files = [
 ]
 
 [[package]]
+name = "chardet"
+version = "5.2.0"
+description = "Universal encoding detector for Python 3"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "chardet-5.2.0-py3-none-any.whl", hash = "sha256:e1cf59446890a00105fe7b7912492ea04b6e6f06d4b742b2c788469e34c82970"},
+    {file = "chardet-5.2.0.tar.gz", hash = "sha256:1b3b6ff479a8c414bc3fa2c0852995695c4a026dcd6d0633b2dd092ca39c1cf7"},
+]
+
+[[package]]
 name = "charset-normalizer"
 version = "3.4.0"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
@@ -1131,8 +1142,8 @@ jsonpatch = ">=1.33,<2.0"
 langsmith = ">=0.1.112,<0.2.0"
 packaging = ">=23.2,<25"
 pydantic = [
-    {version = ">=2.7.4,<3.0.0", markers = "python_full_version >= \"3.12.4\""},
     {version = ">=1,<3", markers = "python_full_version < \"3.12.4\""},
+    {version = ">=2.7.4,<3.0.0", markers = "python_full_version >= \"3.12.4\""},
 ]
 PyYAML = ">=5.3"
 tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<9.0.0"
@@ -1202,8 +1213,8 @@ files = [
 httpx = ">=0.23.0,<1"
 orjson = ">=3.9.14,<4.0.0"
 pydantic = [
-    {version = ">=2.7.4,<3.0.0", markers = "python_full_version >= \"3.12.4\""},
     {version = ">=1,<3", markers = "python_full_version < \"3.12.4\""},
+    {version = ">=2.7.4,<3.0.0", markers = "python_full_version >= \"3.12.4\""},
 ]
 requests = ">=2,<3"
 requests-toolbelt = ">=1.0.0,<2.0.0"
@@ -1708,8 +1719,8 @@ files = [
 annotated-types = ">=0.6.0"
 pydantic-core = "2.23.4"
 typing-extensions = [
-    {version = ">=4.12.2", markers = "python_version >= \"3.13\""},
     {version = ">=4.6.1", markers = "python_version < \"3.13\""},
+    {version = ">=4.12.2", markers = "python_version >= \"3.13\""},
 ]
 
 [package.extras]
@@ -2927,4 +2938,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "3ff8486c0c570a56c0a5c72c30689532497f053e7797a17e2ea2ed4460023706"
+content-hash = "a52acd21040f2fbf97e7a92bee12960517171c11b70398e660c39c2b28e0b942"

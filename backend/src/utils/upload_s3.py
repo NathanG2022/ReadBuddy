@@ -87,7 +87,7 @@ async def process_image(file: UploadFile):
         extracted_text = response1.choices[0].message.content.replace("\n", "") if response1 and response1.choices else None
         if not extracted_text:
             raise ValueError("Failed to extract text from the image")
-        print("extracted text: " + extracted_text)
+        print("extracted text:\n" + extracted_text)
 
         response2 = client.chat.completions.create(
             model='gpt-4o',
@@ -116,16 +116,21 @@ async def process_image(file: UploadFile):
         if not explanation_text:
             explanation_text = "Please keep the camera at least 6 inches above the text."
             raise ValueError("Failed to generate an explanation")
-        print("explanation text: " + explanation_text)
+        print("\nexplanation text:\n " + explanation_text)
         
         response3 = client.images.generate(
+            model="dall-e-3",
             prompt=(
-                "Create an image based on the following excerpt from a book: \n"
+                "Create a detailed and expressive image based on the following excerpt from a book: \n"
                 + explanation_text
-                + "\nThe image should show the emotions of the character, like feeling confused and thoughtful. "
-                "The scene should feel more like reality, with soft colors and a peaceful atmosphere. "
+                + "\nDepict the main character's emotions of confusion and deep thought, capturing their internal struggle. "
+                "The scene should feel grounded in reality, with soft lighting and a tranquil, serene atmosphere. "
+                "Use subtle, muted colors to convey calmness but include some visual contrast to highlight the character's feelings. "
+                "The background can be a peaceful setting, such as a quiet room with natural light filtering through a window or an open landscape. "
+                "Pay attention to the character's facial expressions, body language, and surrounding elements to emphasize their thoughtful state."
             ),
-            size="512x512"  # Other optional parameters as needed
+            size="1024x1024",
+            style="vivid"
         )
 
         # Ensure that response3 contains image data

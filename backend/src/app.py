@@ -30,7 +30,8 @@ app = FastAPI(
 
 origins = [
     "https://readbuddyfrontend.vercel.app",
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://192.168.86.249:3000"
 ]
 
 app.add_middleware(
@@ -127,7 +128,7 @@ def indexing_URL(url: Message):
 
 # POST endpoint for uploading a document (PDF or TXT)
 @app.post("/indexingDoc", description="Index a pdf or txt file through this endpoint")
-def indexing_Doc(file: UploadFile):
+def indexing_Doc(file: UploadFile = File(...)):
     try:
         response = upload_file(file)
         return JSONResponse(content={"response": response}, status_code=200)

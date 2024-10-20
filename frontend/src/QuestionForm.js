@@ -345,7 +345,7 @@ function QuestionForm() {
             {answer && (
                 <div className="results-container">
                     <div className="results-answer">
-                        <h2>Answer:</h2>
+                        <h2>Result:</h2>
                         <ReactMarkdown>{answer}</ReactMarkdown>
                     </div>
                     {documents?.length ? (

@@ -2,13 +2,13 @@
 
 - Backend: under the backend root dir, run: 
 ```
-uvicorn src.app:app --reload --host 0.0.0.0
+uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
 ```
 to start the backend fastapi
 
 - Frontend:
 ```
-npm start
+HOST=0.0.0.0 npm start
 ```
 
 # How to deploy to cloud
@@ -55,6 +55,7 @@ FT.DROPINDEX Websites DD
 # app.image = Image.debian_slim().poetry_install_from_file("./pyproject.toml")
 # @app.function(secrets=[Secret.from_dotenv()])
 # @asgi_app()
+# def endpoint():
 ````
 2. comment out last line
 ```

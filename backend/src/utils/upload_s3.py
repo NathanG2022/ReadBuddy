@@ -5,6 +5,11 @@ import os
 import base64
 from dotenv import load_dotenv
 from openai import OpenAI
+import requests
+from PIL import Image
+from io import BytesIO
+import pytesseract
+import matplotlib.pyplot as plt
 
 # Load environment variables from .env file
 load_dotenv()  # This will load the .env file and make the variables available to os.getenv
@@ -23,12 +28,31 @@ s3 = boto3.client(
     region_name=S3_REGION
 )
 
+# Function to download and perform OCR on an image
+def extract_text_from_image_url(image_url):
+    response = requests.get(image_url)
+    image = Image.open(BytesIO(response.content))
+    # Show the image
+    plt.imshow(image)
+    plt.axis('off')
+    plt.show()
+    text = pytesseract.image_to_string(image)
+    print(text)
+    return text.strip()
+
+
 # Upload image to S3 bucket
 def upload_to_s3(file_obj, file_name):
     bucket_name = S3_BUCKET
     try:
-        s3.upload_fileobj(file_obj, bucket_name, file_name)
+        s3.upload_fileobj(
+            file_obj, 
+            bucket_name, 
+            file_name,
+            ExtraArgs={'ContentType': 'image/jpeg'}
+        )
         file_url = f"https://{bucket_name}.s3.{S3_REGION}.amazonaws.com/{file_name}"
+        print("test: ", extract_text_from_image_url(file_url))
         return {"file_url": file_url}
     except NoCredentialsError:
         return {"error": "AWS credentials not available"}

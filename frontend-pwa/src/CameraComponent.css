@@ -5,6 +5,8 @@
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
+  height: 100vh; /* Full height of the viewport */
+  justify-content: space-between; /* Distribute space to show video and button */
 }
 
 .camera-button {
@@ -35,23 +37,19 @@
 }
 
 .video-container {
-  position: relative;
+  width: 100%;
+  max-width: 640px;
+  flex: 1; /* Take up available space */
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  max-width: 640px;
-  margin: 20px auto;
-  background-color: #f5f5f5;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .video-preview {
   width: 100%;
-  height: auto;
+  max-height: 100%; /* Adjust height to ensure it fits within the viewport */
   border-radius: 8px;
-  object-fit: cover; /* Ensures the video fits properly within the container */
+  object-fit: cover;
 }
 
 .photo-container {
@@ -144,10 +142,9 @@
 }
 
 .capture-button {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  width: 90%; /* Full width minus some padding */
+  max-width: 300px;
+  margin: 10px auto;
   background-color: #f44336;
   color: white;
   padding: 12px 24px;
@@ -157,7 +154,14 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 2; /* Keeps the button above the video */
+  z-index: 2;
+  position: sticky;
+  bottom: 10px; /* Keeps the button at the bottom of the viewport */
+}
+
+.capture-button:hover {
+  background-color: #da190b;
+  transform: translateY(-2px);
 }
 
 @keyframes fadeIn {
@@ -186,6 +190,7 @@
 @media (max-width: 768px) {
   .camera-container {
     padding: 10px;
+    height: 100vh;
   }
   
   .video-container {

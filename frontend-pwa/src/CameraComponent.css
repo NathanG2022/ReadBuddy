@@ -6,7 +6,7 @@
   max-width: 800px;
   margin: 0 auto;
   height: 100vh; /* Full height of the viewport */
-  justify-content: space-between; /* Distribute space to show video and button */
+  justify-content: center; /* Center the content vertically */
 }
 
 .camera-button {
@@ -43,11 +43,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 20px; /* Add space below the video for the button */
 }
 
 .video-preview {
   width: 100%;
-  max-height: 100%; /* Adjust height to ensure it fits within the viewport */
+  height: auto; /* Adjust to ensure the video scales properly */
+  max-height: 80vh; /* Prevents the video from taking more than 80% of the viewport height */
   border-radius: 8px;
   object-fit: cover;
 }
@@ -144,7 +146,7 @@
 .capture-button {
   width: 90%; /* Full width minus some padding */
   max-width: 300px;
-  margin: 10px auto;
+  margin: 0 auto; /* Center the button */
   background-color: #f44336;
   color: white;
   padding: 12px 24px;
@@ -156,7 +158,7 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   z-index: 2;
   position: sticky;
-  bottom: 10px; /* Keeps the button at the bottom of the viewport */
+  bottom: 20px; /* Keeps the button close to the bottom of the viewport */
 }
 
 .capture-button:hover {
@@ -195,7 +197,7 @@
   
   .video-container {
     width: 100%; /* Adjusts container width for mobile */
-    padding: 10px; /* Reduces padding */
+    padding: 0; /* Remove padding to maximize space */
   }
 
   .photo-container {
@@ -212,7 +214,7 @@
     max-width: 100%;
   }
 
-	.capture-button {
+  .capture-button {
     width: auto;
     font-size: 14px; /* Reduces button size for mobile */
     padding: 10px 20px;

@@ -10,6 +10,7 @@ const CameraComponent = () => {
   const [processedResult, setProcessedResult] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     if (isCameraOpen) {
@@ -18,6 +19,8 @@ const CameraComponent = () => {
         .then((stream) => {
           videoRef.current.srcObject = stream;
           videoRef.current.play();
+          // Scroll to the video feed when camera opens
+          containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         })
         .catch((err) => {
           console.error('Error accessing camera: ', err);
@@ -133,7 +136,7 @@ const CameraComponent = () => {
   };
 
   return (
-    <div className="camera-container">
+    <div className="camera-container" ref={containerRef}>
       {!isCameraOpen && !photo && (
         <button 
           className="camera-button" 
@@ -143,25 +146,23 @@ const CameraComponent = () => {
         </button>
       )}
 
-			{isCameraOpen && (
-				<div className="camera-container">
-					<div className="video-container">
-						<video 
-							ref={videoRef} 
-							className="video-preview"
-							width="640"
-							height="480"
-							playsInline // Prevents full-screen on mobile devices
-						/>
-					</div>
-					<button 
-						className="capture-button" 
-						onClick={handleTakePhoto}
-					>
-						Capture Photo
-					</button>
-				</div>
-			)}
+      {isCameraOpen && (
+        <>
+          <div className="video-container">
+            <video 
+              ref={videoRef} 
+              className="video-preview" 
+              playsInline // Prevents full-screen mode on mobile devices
+            />
+          </div>
+          <button 
+            className="capture-button" 
+            onClick={handleTakePhoto}
+          >
+            Capture Image
+          </button>
+        </>
+      )}
 
       <canvas 
         ref={canvasRef} 

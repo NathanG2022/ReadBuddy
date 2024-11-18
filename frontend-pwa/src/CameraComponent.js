@@ -143,23 +143,24 @@ const CameraComponent = () => {
         </button>
       )}
 
-      {isCameraOpen && (
-        <div className="video-container">
-          <video 
-            ref={videoRef} 
-            className="video-preview" 
-            width="640" 
-            height="480"
-          />
-          <button 
-            className="camera-button capture" 
-            onClick={handleTakePhoto}
-          >
-            Capture Image
-          </button>
-        </div>
-      )}
-
+			{isCameraOpen && (
+				<div className="video-container">
+					<video 
+						ref={videoRef} 
+						className="video-preview"
+						width="640"
+						height="480"
+						playsInline // Ensures the video does not go full-screen on mobile
+					/>
+					<button 
+						className="capture-button" 
+						onClick={handleTakePhoto}
+					>
+						Capture Image
+					</button>
+				</div>
+			)}
+			
       <canvas 
         ref={canvasRef} 
         width={640} 

@@ -67,3 +67,7 @@ const baseURL = 'http://localhost:8000' // 'https://nathang2022--readbuddy-backe
 const websocketURL = 'ws://localhost:8000' // 'wss://nathang2022--rag-backend-endpoint.modal.run'
 ```
 
+- PWA FE - CameraComponent.js - ln 4:
+```
+const baseURL = 'https://nathang2022--readbuddy-backend-endpoint.modal.run' // 'http://localhost:8000'
+```

@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './CameraComponent.css';
 
+const baseURL = 'https://nathang2022--readbuddy-backend-endpoint.modal.run' // 'http://localhost:8000'
+
 const CameraComponent = () => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [photo, setPhoto] = useState(null);
@@ -58,34 +60,43 @@ const CameraComponent = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/uploadS3', {
+      const response = await fetch(`${baseURL}/uploadS3`, {
         method: 'POST',
         body: formData,
       });
       const data = await response.json();
-      return data.url;
+      return data.file_url;
     } catch (error) {
       console.error('Error uploading to S3:', error);
       throw error;
     }
   };
 
-  const processImage = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('http://localhost:8000/process_image', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
-      return data.response;
-    } catch (error) {
-      console.error('Error processing image:', error);
-      throw error;
-    }
-  };
+	const processImage = async (url) => {
+		try {
+			const payload = JSON.stringify({ url });
+			console.log('Payload:', payload); // Log the payload to check its contents
+	
+			const response = await fetch(`${baseURL}/process_image_url`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Accept': 'application/json',
+				},
+				body: payload, // Ensure the body is being set correctly
+			});
+	
+			if (!response.ok) {
+				throw new Error(`Error: ${response.status} ${response.statusText}`);
+			}
+	
+			const data = await response.json();
+			return data.response;
+		} catch (error) {
+			console.error('Error processing image:', error);
+			throw error;
+		}
+	};
 
   const handleTakePhoto = async () => {
     const context = canvasRef.current.getContext('2d');
@@ -106,7 +117,7 @@ const CameraComponent = () => {
       const s3Url = await uploadToS3(file);
       
       // Process the image
-      const result = await processImage(file);
+      const result = await processImage(s3Url);
       setProcessedResult(result);
     } catch (error) {
       console.error('Error processing photo:', error);

@@ -29,6 +29,7 @@ def endpoint():
     )
 
     origins = [
+        "https://textura2024.vercel.app",
         "https://frontend-pwa-five.vercel.app",
         "https://readbuddyfrontend.vercel.app",
         "http://localhost:3000",

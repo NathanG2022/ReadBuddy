@@ -1,222 +1,224 @@
 .camera-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-  height: 100vh; /* Full height of the viewport */
-  justify-content: center; /* Center the content vertically */
-}
-
-.camera-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 25px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  margin: 10px 0;
-}
-
-.camera-button:hover {
-  background-color: #45a049;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-.camera-button.capture {
-  background-color: #f44336;
-}
-
-.camera-button.capture:hover {
-  background-color: #da190b;
-}
-
-.video-container {
-  width: 100%;
-  max-width: 640px;
-  flex: 1; /* Take up available space */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px; /* Add space below the video for the button */
-}
-
-.video-preview {
-  width: 100%;
-  height: auto; /* Adjust to ensure the video scales properly */
-  max-height: 80vh; /* Prevents the video from taking more than 80% of the viewport height */
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-.photo-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 30px;
-  padding: 20px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 640px;
-  animation: fadeIn 0.5s ease-in;
-}
-
-.photo-container h3 {
-  color: #333;
-  margin-bottom: 15px;
-  font-size: 1.2em;
-  text-align: center;
-}
-
-.photo-container img.captured-photo {
-  width: 100%;
-  max-width: 500px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 15px;
-}
-
-.loading {
-  margin: 20px 0;
-  padding: 15px;
-  background-color: #e3f2fd;
-  border-radius: 8px;
-  color: #1976d2;
-  font-size: 16px;
-  text-align: center;
-  animation: pulse 1.5s infinite;
-}
-
-.results-container {
-  width: 100%;
-  margin-top: 20px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.result-text {
-  color: #333;
-  font-size: 16px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  margin: 10px 0;
-  padding: 15px;
-  background-color: white;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.result-image {
-  margin-top: 20px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.result-image h4 {
-  color: #333;
-  margin: 15px 0;
-  font-size: 1.1em;
-  text-align: center;
-}
-
-.generated-image {
-  width: 100%;
-  max-width: 400px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin: 10px 0;
-  transition: transform 0.3s ease;
-}
-
-.generated-image:hover {
-  transform: scale(1.02);
-}
-
-.capture-button {
-  width: 90%; /* Full width minus some padding */
-  max-width: 300px;
-  margin: 0 auto; /* Center the button */
-  background-color: #f44336;
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 25px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 2;
-  position: sticky;
-  bottom: 20px; /* Keeps the button close to the bottom of the viewport */
-}
-
-.capture-button:hover {
-  background-color: #da190b;
-  transform: translateY(-2px);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    height: 100vh; /* Full height of the viewport */
+    justify-content: center; /* Center the content vertically */
+    background-color: #EFEAF6; /* Light background to contrast with buttons */
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .camera-button {
+    background-color: #290B66; /* Theme color */
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    margin: 10px 0;
   }
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 0.6;
+  
+  .camera-button:hover {
+    background-color: #3a0c8e; /* Darker shade for hover */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   }
-  50% {
-    opacity: 1;
+  
+  .camera-button.capture {
+    background-color: #f44336;
   }
-  100% {
-    opacity: 0.6;
-  }
-}
-
-@media (max-width: 768px) {
-  .camera-container {
-    padding: 10px;
-    height: 100vh;
+  
+  .camera-button.capture:hover {
+    background-color: #da190b;
   }
   
   .video-container {
-    width: 100%; /* Adjusts container width for mobile */
-    padding: 0; /* Remove padding to maximize space */
-  }
-
-  .photo-container {
-    width: 95%;
-    max-width: 100%;
-  }
-
-  .camera-button {
     width: 100%;
-    max-width: 300px;
+    max-width: 640px;
+    flex: 1; /* Take up available space */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px; /* Add space below the video for the button */
   }
-
+  
+  .video-preview {
+    width: 100%;
+    height: auto; /* Ensure the video scales properly */
+    max-height: 80vh; /* Prevents the video from taking more than 80% of the viewport height */
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  .photo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 260px;
+    padding: 20px;
+    background-color: #F3E9FB;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 640px;
+    animation: fadeIn 0.5s ease-in;
+  }
+  
+  .photo-container h3 {
+    color: #290B66; /* Theme color for headings */
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    text-align: center;
+  }
+  
+  .photo-container img.captured-photo {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+  }
+  
+  .loading {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #EFEAF6;
+    border-radius: 8px;
+    color: #290B66; /* Theme color */
+    font-size: 16px;
+    text-align: center;
+    animation: pulse 1.5s infinite;
+  }
+  
+  .results-container {
+    width: 100%;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #F6F1FC;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .result-text {
+    color: #333;
+    font-size: 16px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin: 10px 0;
+    padding: 15px;
+    background-color: #EFEAF6;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+  }
+  
+  .result-image {
+    margin-top: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .result-image h4 {
+    color: #290B66; /* Theme color for subheadings */
+    margin: 15px 0;
+    font-size: 1.1em;
+    text-align: center;
+  }
+  
   .generated-image {
-    max-width: 100%;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 10px 0;
+    transition: transform 0.3s ease;
   }
-
+  
+  .generated-image:hover {
+    transform: scale(1.02);
+  }
+  
   .capture-button {
-    width: auto;
-    font-size: 14px; /* Reduces button size for mobile */
-    padding: 10px 20px;
+    width: 90%; /* Full width minus some padding */
+    max-width: 300px;
+    margin: 0 auto; /* Center the button */
+    background-color: #290B66; /* Theme color */
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+    position: sticky;
+    bottom: 20px; /* Keeps the button close to the bottom of the viewport */
   }
-}
+  
+  .capture-button:hover {
+    background-color: #3a0c8e; /* Darker shade for hover */
+    transform: translateY(-2px);
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.6;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .camera-container {
+      padding: 10px;
+      height: 100vh;
+    }
+    
+    .video-container {
+      width: 100%; /* Adjusts container width for mobile */
+      padding: 0; /* Remove padding to maximize space */
+    }
+  
+    .photo-container {
+      width: 95%;
+      max-width: 100%;
+    }
+  
+    .camera-button {
+      width: 100%;
+      max-width: 300px;
+    }
+  
+    .generated-image {
+      max-width: 100%;
+    }
+  
+    .capture-button {
+      width: auto;
+      font-size: 14px; /* Reduces button size for mobile */
+      padding: 10px 20px;
+    }
+  }
+  

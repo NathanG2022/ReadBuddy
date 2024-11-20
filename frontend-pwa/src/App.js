@@ -5,7 +5,9 @@ import CameraComponent from './CameraComponent';
 function App() {
   return (
     <div className="App">
-      <h1>Read Buddy</h1>
+      <header className="App-header">
+      <img src={`${process.env.PUBLIC_URL}/logo192.png`} alt="Company Logo" className="App-logo" />
+      </header>
       <CameraComponent />
     </div>
   );

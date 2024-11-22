@@ -1,14 +1,14 @@
 .camera-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    max-width: 800px;
-    margin: 0 auto;
-    height: 100vh; /* Full height of the viewport */
-    justify-content: center; /* Center the content vertically */
-    background-color: #EFEAF6; /* Light background to contrast with buttons */
-  }
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center horizontally */
+  justify-content: flex-start; /* Align items to the top */
+  padding: 0; /* Remove any padding inside the container */
+  max-width: 800px;
+  margin: 0 auto;
+  height: 100vh; /* Full height of the viewport */
+  background-color: #EFEAF6;
+}
   
   .camera-button {
     background-color: #290B66; /* Theme color */
@@ -38,35 +38,35 @@
   }
   
   .video-container {
-    width: 100%;
+    display: flex; /* Make the container a flexbox */
+    flex-direction: column; /* Ensure children are aligned vertically */
+    align-items: flex-start; /* Align children (video) to the top */
+    justify-content: flex-start; /* Align content to the top vertically */
+    width: 100%; /* Ensure it spans full width */
     max-width: 640px;
-    flex: 1; /* Take up available space */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px; /* Add space below the video for the button */
+    height: 100%; /* Set height to fill the parent container */
+    padding: 0; /* Remove any padding */
+    margin: 0; /* Remove margins */
   }
   
   .video-preview {
     width: 100%;
-    height: auto; /* Ensure the video scales properly */
-    max-height: 80vh; /* Prevents the video from taking more than 80% of the viewport height */
-    border-radius: 8px;
-    object-fit: cover;
+    height: auto; /* Keep the aspect ratio */
+    object-fit: cover; /* Ensure proper video scaling */
+    margin: 0; /* Remove extra space around the video */
   }
   
   .photo-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 260px;
-    padding: 20px;
+    flex-direction: column; /* Stack content vertically */
+    align-items: center; /* Center horizontally */
+    padding: 10px; /* Optional: Add minimal padding */
+    margin: 0; /* Remove extra margin */
     background-color: #F3E9FB;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 640px;
-    animation: fadeIn 0.5s ease-in;
   }
   
   .photo-container h3 {
@@ -117,7 +117,7 @@
   }
   
   .result-image {
-    margin-top: 20px;
+    margin-top: -40px;
     width: 100%;
     display: flex;
     flex-direction: column;

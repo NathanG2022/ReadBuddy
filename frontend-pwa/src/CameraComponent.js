@@ -20,7 +20,7 @@ const CameraComponent = () => {
           videoRef.current.srcObject = stream;
           videoRef.current.play();
           // Scroll to the video feed when camera opens
-          containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         })
         .catch((err) => {
           console.error('Error accessing camera: ', err);

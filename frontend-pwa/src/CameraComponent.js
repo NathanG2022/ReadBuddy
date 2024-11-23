@@ -11,6 +11,7 @@ const CameraComponent = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
+  const explanationRef = useRef(null);
 
   useEffect(() => {
     if (isCameraOpen) {
@@ -107,32 +108,44 @@ const CameraComponent = () => {
     const imageDataURL = canvasRef.current.toDataURL('image/jpeg', 0.9);
     setPhoto(imageDataURL);
     setIsCameraOpen(false);
-    
+  
     try {
       setIsLoading(true);
       // Generate timestamp filename
       const filename = generateTimestampFilename();
-      
+  
       // Convert data URL to File object
       const file = dataURLtoFile(imageDataURL, filename);
-      
+  
       // Upload to S3
       const s3Url = await uploadToS3(file);
-      
+  
       // Process the image
       const result = await processImage(s3Url);
       setProcessedResult(result);
+  
+      // Scroll to the Explanation section
+      explanationRef.current.scrollIntoView({
+        behavior: 'smooth', // Smooth scrolling
+        block: 'start',     // Align Explanation to the top of the viewport
+      });
     } catch (error) {
       console.error('Error processing photo:', error);
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   const handleTakeAnotherPhoto = () => {
     setPhoto(null);
     setProcessedResult(null);
     setIsCameraOpen(true);
+
+    // Scroll to the top of the page
+    window.scrollTo({
+      top: 0, // Scroll to the very top
+      behavior: 'smooth', // Smooth scrolling
+    });
   };
 
   return (
@@ -173,7 +186,7 @@ const CameraComponent = () => {
 
       {photo && (
         <div className="photo-container">
-          <h3>Image</h3>
+          <h3 className="title">Image</h3>
           <img src={photo} alt="Captured" className="captured-photo" />
           
           {isLoading && (
@@ -181,14 +194,14 @@ const CameraComponent = () => {
           )}
 
           {processedResult && (
-            <div className="results-container">
-              <h3>Explanation</h3>
+            <div className="results-container" ref={explanationRef}>
+              <h3 className="title">Explanation</h3>
               <div className="result-text">
                 {processedResult.text}
               </div>
               {processedResult.image_url && (
                 <div className="result-image">
-                  <h4>Illustration</h4>
+                  <h3 className="title">Illustration</h3>
                   <img 
                     src={processedResult.image_url} 
                     alt="AI Generated Illustration" 

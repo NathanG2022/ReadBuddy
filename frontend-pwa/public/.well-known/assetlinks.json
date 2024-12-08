@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.textura2024.twa",
+        "sha256_cert_fingerprints": ["28:69:EB:DD:7C:FD:F5:67:34:54:C7:B2:B5:62:A1:FF:06:05:DD:F1:07:66:06:39:8A:7A:14:96:10:EC:22:D5"]
+      }
+    }]

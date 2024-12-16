@@ -851,6 +851,26 @@ google-auth = "*"
 httplib2 = ">=0.19.0"
 
 [[package]]
+name = "google-cloud-texttospeech"
+version = "2.22.0"
+description = "Google Cloud Texttospeech API client library"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "google_cloud_texttospeech-2.22.0-py2.py3-none-any.whl", hash = "sha256:57a9457d6f14a8265df3feb185f376be03dfa4991dcd0e002607d7cf1e7c690c"},
+    {file = "google_cloud_texttospeech-2.22.0.tar.gz", hash = "sha256:cbfd553d40da871c58ff6c3f81097cad9f9f0e50e6e44710d2472d8499a928d2"},
+]
+
+[package.dependencies]
+google-api-core = {version = ">=1.34.1,<2.0.dev0 || >=2.11.dev0,<3.0.0dev", extras = ["grpc"]}
+google-auth = ">=2.14.1,<2.24.0 || >2.24.0,<2.25.0 || >2.25.0,<3.0.0dev"
+proto-plus = [
+    {version = ">=1.25.0,<2.0.0dev", markers = "python_version >= \"3.13\""},
+    {version = ">=1.22.3,<2.0.0dev", markers = "python_version < \"3.13\""},
+]
+protobuf = ">=3.20.2,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<6.0.0dev"
+
+[[package]]
 name = "google-generativeai"
 version = "0.8.3"
 description = "Google Generative AI High level API client library and tools."
@@ -3666,4 +3686,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "aea710c0911647575f54fd7848e745fcf06e958cb82088fea9b512985909451f"
+content-hash = "1ab0860670e1197eeec5fa2e79f21a924c6a1f858312ccf947d15d961c20a138"

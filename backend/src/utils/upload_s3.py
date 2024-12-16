@@ -43,14 +43,14 @@ s3 = boto3.client(
 
 
 # Upload image to S3 bucket
-def upload_to_s3(file_obj, file_name):
+def upload_to_s3(file_obj, file_name, content_type="application/octet-stream"):
     bucket_name = S3_BUCKET
     try:
         s3.upload_fileobj(
             file_obj, 
             bucket_name, 
             file_name,
-            ExtraArgs={'ContentType': 'image/jpeg'}
+            ExtraArgs={'ContentType': content_type}
         )
         file_url = f"https://{bucket_name}.s3.{S3_REGION}.amazonaws.com/{file_name}"
         # print("DBUG: ", extract_text_from_image_url(file_url))
@@ -112,86 +112,122 @@ async def extract_text_with_gemini(file: UploadFile):
 
 # Function to process image and call OpenAI API
 async def process_image(file: UploadFile):
+    response_data = {}
     try:
         # Step 1: Extract text using Google Gemini 1.5 Pro
-        extracted_text = await extract_text_with_gemini(file)
-        print(f"Extracted Text:\n{extracted_text}")
+        try:
+            extracted_text = await extract_text_with_gemini(file)
+            print(f"Extracted Text:\n{extracted_text}")
+            response_data["text"] = extracted_text
+        except Exception as e:
+            print(f"Error extracting text with Gemini: {e}")
+            response_data["text"] = None
 
         # Step 2: Generate explanation using OpenAI GPT
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        response2 = client.chat.completions.create(
-            model='gpt-4o',
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
+        explanation_text = None
+        if response_data.get("text"):
+            try:
+                client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+                response2 = client.chat.completions.create(
+                    model='gpt-4o',
+                    messages=[
                         {
-                            "type": "text",
-                            "text": (
-                                "You are an experienced tutor who teaches middle school kids."
-                                "The following text is from a book. Explain it in a simple, engaging, and supportive way."
-                                "Make the explanation suitable for neurodivergent students. Use short, clear sentences."
-                                "Keep the response under 80 words. Here is the text: " + extracted_text
-                            ),
-                        },
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": (
+                                        "You are an experienced tutor who teaches middle school kids."
+                                        "The following text is from a book. Explain it in a simple, engaging, and supportive way."
+                                        "Make the explanation suitable for neurodivergent students. Use short, clear sentences."
+                                        "Keep the response under 80 words. Here is the text: " + extracted_text
+                                    ),
+                                },
+                            ],
+                        }
                     ],
-                }
-            ],
-            temperature=0.7,
-            max_tokens=500,
-        )
+                    temperature=0.7,
+                    max_tokens=500,
+                )
+                explanation_text = response2.choices[0].message.content if response2 and response2.choices else None
+                if explanation_text:
+                    response_data["explanation_text"] = explanation_text
+                else:
+                    raise ValueError("Failed to generate explanation text.")
+            except Exception as e:
+                print(f"Error generating explanation with GPT: {e}")
+                response_data["explanation_text"] = None
 
-        # Ensure that response2 is valid and contains choices
-        explanation_text = response2.choices[0].message.content if response2 and response2.choices else None
-        if not explanation_text:
-            explanation_text = "Please keep the camera at least 6 inches above the text."
-            raise ValueError("Failed to generate an explanation")
-        print("\nExplanation text:\n" + explanation_text)
-        
-        response3 = client.images.generate(
-            model="dall-e-3",
-            prompt=(
-                "Create a detailed and expressive image based on the following text: \n"
-                + explanation_text +
-                "\nThe scene should feel grounded in reality, with soft lighting and a tranquil, serene atmosphere. "
-                "Use subtle, muted colors to convey calmness but include some visual contrast to highlight the emotions. "
-            ),
-            size="1024x1024",
-            style="vivid"
-        )
+        # Step 3: Generate image using DALL-E
+        resized_image_url = None
+        if explanation_text:
+            try:
+                response3 = client.images.generate(
+                    model="dall-e-3",
+                    prompt=(
+                        "Create a detailed and expressive image based on the following text: \n"
+                        + explanation_text +
+                        "\nThe scene should feel grounded in reality, with soft lighting and a tranquil, serene atmosphere. "
+                        "Use subtle, muted colors to convey calmness but include some visual contrast to highlight the emotions. "
+                    ),
+                    size="1024x1024",
+                    style="vivid"
+                )
 
-        # Step 4: Download and resize the generated image
-        image_url = response3.data[0].url
-        response = requests.get(image_url)
-        image = Image.open(BytesIO(response.content))
+                # Download and resize the generated image
+                image_url = response3.data[0].url
+                response = requests.get(image_url)
+                image = Image.open(BytesIO(response.content))
 
-        # Resize the image to 256x256
-        resized_image = image.resize((240, 240))
+                # Resize the image to 256x256
+                resized_image = image.resize((240, 240))
 
-        # Step 5: Save resized image to S3
-        resized_image_io = BytesIO()
-        resized_image.save(resized_image_io, format="JPEG")
-        resized_image_io.seek(0)  # Reset file pointer for upload
+                # Save resized image to S3
+                resized_image_io = BytesIO()
+                resized_image.save(resized_image_io, format="bmp")
+                resized_image_io.seek(0)
 
-        # Define a filename for the resized image
-        s3_file_name = "resized_image_240x240.jpg"
-        s3_response = upload_to_s3(resized_image_io, s3_file_name)
+                # Upload to S3
+                s3_file_name = "resized_image_240x240.bmp"
+                s3_response = upload_to_s3(resized_image_io, s3_file_name, content_type="image/bmp")
+                resized_image_url = s3_response.get("file_url", None)
+                response_data["image_url"] = resized_image_url
+            except Exception as e:
+                print(f"Error generating or resizing image with DALL-E: {e}")
+                response_data["image_url"] = None
 
-        # Ensure the S3 upload succeeded
-        if "error" in s3_response:
-            raise ValueError(f"Failed to upload resized image to S3: {s3_response['error']}")
+        # Step 4: Generate MP3 using Amazon Polly
+        mp3_url = None
+        if explanation_text:
+            try:
+                polly_client = boto3.client(
+                    "polly",
+                    aws_access_key_id=AWS_ACCESS_KEY,
+                    aws_secret_access_key=AWS_SECRET_KEY,
+                    region_name=S3_REGION,
+                )
+                polly_response = polly_client.synthesize_speech(
+                    Text=explanation_text,
+                    OutputFormat="mp3",
+                    VoiceId="Joanna",
+                )
 
-        # Get the S3 URL of the resized image
-        resized_image_url = s3_response["file_url"]
+                # Save the MP3 to a BytesIO object
+                mp3_io = BytesIO(polly_response["AudioStream"].read())
 
-        # Return explanation text and resized image URL
-        return {
-            "text": explanation_text,
-            "image_url": resized_image_url
-        }
+                # Upload to S3
+                mp3_filename = "explanation_audio.mp3"
+                s3_audio_response = upload_to_s3(mp3_io, mp3_filename, content_type="audio/mpeg")
+                mp3_url = s3_audio_response.get("file_url", None)
+                response_data["mp3_url"] = mp3_url
+            except Exception as e:
+                print(f"Error generating MP3 with Amazon Polly: {e}")
+                response_data["mp3_url"] = None
+
+        return response_data
 
     except Exception as e:
-        print(f"Error processing image: {e}")
+        print(f"Unexpected error: {e}")
         raise e
 
 # Function to process image from URL

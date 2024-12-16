@@ -8,6 +8,7 @@ from openai import OpenAI
 import requests
 from PIL import Image
 from io import BytesIO
+import google.generativeai as genai
 # import pytesseract
 # import matplotlib.pyplot as plt
 
@@ -71,48 +72,53 @@ async def encode_image_to_base64(file: UploadFile):
 
     return base64_img_str
 
+# Function to extract text from an image using Google Gemini 1.5 Pro
+async def extract_text_with_gemini(file: UploadFile):
+    try:
+        # Load the API key from environment variables
+        api_key = os.getenv("GOOGLE_GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("Google Gemini API key is missing. Please set it in the .env file.")
+
+        # Configure the Gemini API with the provided API key
+        genai.configure(api_key=api_key)
+
+        # Read the uploaded image file content
+        file_content = await file.read()
+
+        # Encode the image as base64
+        base64_image = base64.b64encode(file_content).decode('utf-8')
+
+        # Initialize the Gemini 1.5 Pro model
+        model = genai.GenerativeModel(model_name="gemini-1.5-pro")
+
+        # Prepare the prompt
+        prompt = "Extract the text from this image with high accuracy."
+
+        # Send the image and prompt to the Gemini model
+        response = model.generate_content(
+            [{'mime_type': 'image/jpeg', 'data': base64_image}, prompt]
+        )
+
+        # Parse the response to get the extracted text
+        extracted_text = response.text
+        if not extracted_text:
+            raise ValueError("No text extracted from the image.")
+
+        return extracted_text.strip()
+
+    except Exception as e:
+        raise ValueError(f"Error with Gemini 1.5 Pro: {e}")
 
 # Function to process image and call OpenAI API
 async def process_image(file: UploadFile):
     try:
-        # Convert the uploaded image file to base64
-        base64_img = await encode_image_to_base64(file)
+        # Step 1: Extract text using Google Gemini 1.5 Pro
+        extracted_text = await extract_text_with_gemini(file)
+        print(f"Extracted Text:\n{extracted_text}")
 
+        # Step 2: Generate explanation using OpenAI GPT
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-        response1 = client.chat.completions.create(
-            model='gpt-4o',
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text", 
-                            "text": (
-                                "Please extract the text from the attached screenshot with high accuracy, ensuring "
-                                "that all punctuation, capitalization, and formatting are preserved as closely as possible. "
-                                "The goal is to capture the full text exactly as it appears in the image, without any "
-                                "additional characters or missing content. Pay attention to any special characters, italics, "
-                                "or unusual spacing to ensure the extracted text matches the original formatting."
-                            ),
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": base64_img}  # Pass base64-encoded image to OpenAI API
-                        }
-                    ],
-                }
-            ],
-            temperature=0,
-            max_tokens=500,
-        )
-
-        # Extracted text cleanup: Remove line return characters (\n)
-        extracted_text = response1.choices[0].message.content.replace("\n", "") if response1 and response1.choices else None
-        if not extracted_text:
-            raise ValueError("Failed to extract text from the image")
-        print("Extracted text:\n" + extracted_text)
-
         response2 = client.chat.completions.create(
             model='gpt-4o',
             messages=[
@@ -145,34 +151,48 @@ async def process_image(file: UploadFile):
         response3 = client.images.generate(
             model="dall-e-3",
             prompt=(
-                "Create a detailed and expressive image based on the following excerpt from a book: \n"
+                "Create a detailed and expressive image based on the following text: \n"
                 + explanation_text +
-                "\nDepict the main character's emotions of confusion and deep thought, capturing their internal struggle. "
-                "The scene should feel grounded in reality, with soft lighting and a tranquil, serene atmosphere. "
-                "Use subtle, muted colors to convey calmness but include some visual contrast to highlight the character's feelings. "
-                "The background can be a peaceful setting, such as a quiet room with natural light filtering through a window or an open landscape. "
-                "Pay attention to the character's facial expressions, body language, and surrounding elements to emphasize their thoughtful state."
+                "\nThe scene should feel grounded in reality, with soft lighting and a tranquil, serene atmosphere. "
+                "Use subtle, muted colors to convey calmness but include some visual contrast to highlight the emotions. "
             ),
             size="1024x1024",
             style="vivid"
         )
 
-        # Ensure that response3 contains image data
-        image_url = response3.data[0].url if response3 and response3.data else None
-        if not image_url:
-            image_url = "/no_image.jpg"
-            raise ValueError("Failed to generate the illustrative image")
+        # Step 4: Download and resize the generated image
+        image_url = response3.data[0].url
+        response = requests.get(image_url)
+        image = Image.open(BytesIO(response.content))
 
-        # Return the response from OpenAI
+        # Resize the image to 256x256
+        resized_image = image.resize((240, 240))
+
+        # Step 5: Save resized image to S3
+        resized_image_io = BytesIO()
+        resized_image.save(resized_image_io, format="JPEG")
+        resized_image_io.seek(0)  # Reset file pointer for upload
+
+        # Define a filename for the resized image
+        s3_file_name = "resized_image_240x240.jpg"
+        s3_response = upload_to_s3(resized_image_io, s3_file_name)
+
+        # Ensure the S3 upload succeeded
+        if "error" in s3_response:
+            raise ValueError(f"Failed to upload resized image to S3: {s3_response['error']}")
+
+        # Get the S3 URL of the resized image
+        resized_image_url = s3_response["file_url"]
+
+        # Return explanation text and resized image URL
         return {
             "text": explanation_text,
-            "image_url": image_url
+            "image_url": resized_image_url
         }
 
     except Exception as e:
-        print(f"Error processing image or calling OpenAI: {e}")
+        print(f"Error processing image: {e}")
         raise e
-
 
 # Function to process image from URL
 async def process_image_from_url(image_url: str):
